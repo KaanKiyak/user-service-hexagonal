@@ -14,13 +14,19 @@ type EventLogRepository interface {
 	Save(ctx context.Context, eventLog *domain.EventLog) error
 }
 type UserService interface {
-	RegisterUser(ctx context.Context, user *domain.User) (*domain.User, error)
-	GetProfile(ctx context.Context, user *domain.User) (*domain.User, error)
-	UpdateProfile(ctx context.Context, user *domain.User) (*domain.User, error)
+	CreateUser(email, password string) (*domain.User, error)
+	ReadUser(id string) (*domain.User, error)
+	ReadUsers() ([]*domain.User, error)
+	UpdateUser(id, email, password string) error
+	DeleteUser(id string) error
+	UpdateMembershipStatus(id string, status bool) error
 }
+
 type UserRepository interface {
-	GetByID(ctx context.Context, userID string) (*domain.User, error)
-	GetByEmail(ctx context.Context, email string) (*domain.User, error)
-	RegisterUser(ctx context.Context, user *domain.User) (*domain.User, error)
-	UpdateProfile(ctx context.Context, user *domain.User) (*domain.User, error)
+	CreateUser(email, password string) (*domain.User, error)
+	ReadUser(id string) (*domain.User, error)
+	ReadUsers() ([]*domain.User, error)
+	UpdateUser(id, email, password string) error
+	DeleteUser(id string) error
+	UpdateMembershipStatus(id string, status bool) error
 }
