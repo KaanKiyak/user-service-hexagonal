@@ -23,7 +23,7 @@ func (r *Register) RegisterUser(c *fiber.Ctx) error {
 			"error": "geçersiz istek formu",
 		})
 	}
-
+	//buraya validayionslar gelecek
 	createdUser, err := r.userService.CreateUser(&req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
