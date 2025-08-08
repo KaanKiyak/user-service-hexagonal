@@ -14,7 +14,7 @@ type EventLogRepository interface {
 	Save(ctx context.Context, eventLog *domain.EventLog) error
 }
 type UserService interface {
-	CreateUser(email, password string) (*domain.User, error)
+	CreateUser(user *domain.User) (*domain.User, error)
 	ReadUser(id string) (*domain.User, error)
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
@@ -23,7 +23,7 @@ type UserService interface {
 }
 
 type UserRepository interface {
-	CreateUser(email, password string) (*domain.User, error)
+	CreateUser(user *domain.User) (*domain.User, error)
 	ReadUser(id string) (*domain.User, error)
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
