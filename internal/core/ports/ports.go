@@ -20,7 +20,6 @@ type UserService interface {
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
 	DeleteUser(id string) error
-	UpdateMembershipStatus(id string, status bool) error
 }
 
 type UserRepository interface {
@@ -29,5 +28,4 @@ type UserRepository interface {
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
 	DeleteUser(id string) error
-	UpdateMembershipStatus(id string, status bool) error
 }
