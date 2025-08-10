@@ -15,7 +15,7 @@ func NewRegister(userService ports.UserService) *Register {
 		userService: userService,
 	}
 }
-func (r *Register) RegisterUser(c *fiber.Ctx) error {
+func (r *Register) CreateUser(c *fiber.Ctx) error {
 	var req domain.User
 
 	if err := c.BodyParser(&req); err != nil {
