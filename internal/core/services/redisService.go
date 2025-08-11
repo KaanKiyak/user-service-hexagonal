@@ -5,19 +5,22 @@ import (
 	"user-service-hexagonal/internal/core/ports"
 )
 
-type redisService struct {
+type RedisService struct {
 	redis ports.RedisPorts
 }
 
-func NewRedisService(redis ports.RedisPorts) *redisService {
-	return &redisService{}
+func NewRedisService(redis ports.RedisPorts) *RedisService {
+	return &RedisService{redis: redis}
 }
-func (r *redisService) Set(ctx context.Context, key string, value interface{}) error {
+
+func (r *RedisService) Set(ctx context.Context, key string, value interface{}) error {
 	return r.redis.Set(ctx, key, value)
 }
-func (r *redisService) Get(ctx context.Context, key string) (interface{}, error) {
-	return r.redis.Get(ctx, key)
+
+func (r *RedisService) Get(ctx context.Context, key string, value interface{}) error {
+	return r.redis.Get(ctx, key, value)
 }
-func (r *redisService) Del(ctx context.Context, key string) error {
+
+func (r *RedisService) Del(ctx context.Context, key string) error {
 	return r.redis.Del(ctx, key)
 }

@@ -6,7 +6,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func ValidateToken(token string, secretKey string) (bool, error) {
+var secretKey = "senin-gizli-key"
+
+func ValidateToken(token string) (bool, error) {
 	_, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("geçersiz imzalama yöntemi")

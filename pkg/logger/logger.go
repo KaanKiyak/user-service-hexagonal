@@ -1,83 +1,81 @@
 package logger
 
 import (
-	"database/sql"
+	"log"
+	"strings"
 	"time"
+	"user-service-hexagonal/internal/config"
 )
 
-// EventType türü (enum karşılığı)
-type EventType string
-
-const (
-	EventLogin          EventType = "LOGIN"
-	EventLogout         EventType = "LOGOUT"
-	EventProfileRequest EventType = "PROFILE_REQUEST"
-)
-
-// EventStatus türü (enum karşılığı)
-type EventStatus string
-
-const (
-	StatusSuccess EventStatus = "SUCCESS"
-	StatusFailed  EventStatus = "FAILED"
-)
-
-// EventLog kayıt modeli
+// EventLog structu event_logs tablosunu temsil eder
 type EventLog struct {
+	ID          int
 	UserID      *int
-	Email       *string
-	SessionID   *string
-	EventType   EventType
+	Email       string
+	SessionID   string
+	EventType   string // LOGIN, LOGOUT, PROFILE_REQUEST
 	IP          string
-	UserAgent   *string
-	Status      EventStatus
-	Reason      *string
-	RequestPath *string
+	UserAgent   string
+	Status      string // SUCCESS, FAILED
+	Reason      string
+	RequestPath string
 	CreatedAt   time.Time
 }
 
-type Logger struct {
-	db *sql.DB
-}
+// LogEvent, verilen event bilgisini validasyonla birlikte DB'ye yazar
+func LogEvent(
+	userID *int,
+	email, sessionID, eventType, status, reason, ip, userAgent, requestPath string,
+) error {
 
-// NewLogger MySQL bağlantısını başlatır
-func NewLogger(dsn string) (*Logger, error) {
-	// Örnek DSN: "user:password@tcp(localhost:3306)/user_db"
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
-	// Bağlantı test et
-	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-	return &Logger{db: db}, nil
-}
+	// Formatlama
+	status = strings.ToUpper(strings.TrimSpace(status))
+	eventType = strings.ToUpper(strings.TrimSpace(eventType))
 
-// LogEvent event_logs tablosuna kayıt ekler
-func (l *Logger) LogEvent(log EventLog) error {
+	// ENUM kontrolü
+	if status != "SUCCESS" && status != "FAILED" {
+		log.Printf("WARN: Invalid status '%s', fallback to 'FAILED'", status)
+		status = "FAILED"
+	}
+
+	// Log kaydı oluştur
+	event := EventLog{
+		UserID:      userID,
+		Email:       email,
+		SessionID:   sessionID,
+		EventType:   eventType,
+		IP:          ip,
+		UserAgent:   userAgent,
+		Status:      status,
+		Reason:      reason,
+		RequestPath: requestPath,
+		CreatedAt:   time.Now(),
+	}
+
+	// SQL sorgusu
 	query := `
-	INSERT INTO event_logs (
-		user_id, email, session_id, event_type, ip, user_agent, status, reason, request_path, created_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO event_logs (user_id, email, session_id, event_type, ip, user_agent, status, reason, request_path, created_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	_, err := l.db.Exec(query,
-		log.UserID,
-		log.Email,
-		log.SessionID,
-		string(log.EventType),
-		log.IP,
-		log.UserAgent,
-		string(log.Status),
-		log.Reason,
-		log.RequestPath,
-		time.Now(),
+	_, err := config.DB.Exec(query,
+		event.UserID,
+		event.Email,
+		event.SessionID,
+		event.EventType,
+		event.IP,
+		event.UserAgent,
+		event.Status,
+		event.Reason,
+		event.RequestPath,
+		event.CreatedAt,
 	)
-	return err
-}
 
-// Close MySQL bağlantısını kapatır
-func (l *Logger) Close() error {
-	return l.db.Close()
+	if err != nil {
+		log.Printf("ERROR: Event log save error: %v", err)
+		return err
+	}
+
+	log.Printf("[AUDIT] %s event logged for email=%s status=%s", event.EventType, event.Email, event.Status)
+	return nil
 }

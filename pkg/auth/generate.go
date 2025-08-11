@@ -48,9 +48,9 @@ func GenerateTokens(user *domain.User, secretKey string, redis RedisClient) (str
 }
 
 // RefreshTokens ile yeni access ve refresh token üret
-func RefreshTokens(refreshToken string, secretKey string, redis RedisClient) (string, string, error) {
+func RefreshTokens(refreshTokenStr string, secretKey string, redis RedisClient) (string, string, error) {
 	// Token doğrula
-	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(refreshTokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("geçersiz imzalama yöntemi")
 		}
@@ -69,7 +69,7 @@ func RefreshTokens(refreshToken string, secretKey string, redis RedisClient) (st
 	// Redis'ten refresh token doğrula
 	var storedToken string
 	err = redis.Get(context.Background(), uuid, &storedToken)
-	if err != nil || storedToken != refreshToken {
+	if err != nil || storedToken != refreshTokenStr {
 		return "", "", errors.New("refresh token bulunamadı veya eşleşmedi")
 	}
 
