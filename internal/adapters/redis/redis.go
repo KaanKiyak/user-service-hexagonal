@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"time"
-	_ "user-service-hexagonal/internal/core/ports"
 )
 
 type RedisAdapter struct {
@@ -23,6 +22,7 @@ func NewRedisAdapter(addr string, password string, db int) *RedisAdapter {
 		client: rdb,
 	}
 }
+
 func (r *RedisAdapter) Set(ctx context.Context, key string, value interface{}) error {
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -35,6 +35,7 @@ func (r *RedisAdapter) Set(ctx context.Context, key string, value interface{}) e
 
 	return nil
 }
+
 func (r *RedisAdapter) Get(ctx context.Context, key string, value interface{}) error {
 	data, err := r.client.Get(ctx, key).Result()
 	if err == redis.Nil {
@@ -43,13 +44,13 @@ func (r *RedisAdapter) Get(ctx context.Context, key string, value interface{}) e
 		return fmt.Errorf("failed to get value for key %q: %v", key, err)
 	}
 
-	// JSON'dan hedef struct'a parse et
 	if err := json.Unmarshal([]byte(data), value); err != nil {
 		return fmt.Errorf("failed to unmarshal cache value for key %q: %v", key, err)
 	}
 
 	return nil
 }
+
 func (r *RedisAdapter) Del(ctx context.Context, key string) error {
 	if err := r.client.Del(ctx, key).Err(); err != nil {
 		return fmt.Errorf("failed to delete value for key %q: %v", key, err)
