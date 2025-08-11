@@ -6,7 +6,8 @@ import (
 )
 
 type AuthService interface {
-	GenerateToken(user *domain.User) (string, error)
+	GenerateTokens(user *domain.User) (accessToken string, refreshToken string, err error)
+	RefreshTokens(refreshToken string) (newAccessToken string, newRefreshToken string, err error)
 	ValidateToken(token string) (bool, error)
 	Logout(ctx context.Context, token string) error
 }
@@ -19,7 +20,6 @@ type UserService interface {
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
 	DeleteUser(id string) error
-	UpdateMembershipStatus(id string, status bool) error
 }
 
 type UserRepository interface {
@@ -28,5 +28,4 @@ type UserRepository interface {
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
 	DeleteUser(id string) error
-	UpdateMembershipStatus(id string, status bool) error
 }

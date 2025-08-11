@@ -47,7 +47,3 @@ func (u *userService) UpdateUser(id, email, password string) error {
 func (u *userService) DeleteUser(id string) error {
 	return u.repo.DeleteUser(id)
 }
-
-func (u *userService) UpdateMembershipStatus(id string, status bool) error {
-	return u.repo.UpdateMembershipStatus(id, status)
-}
