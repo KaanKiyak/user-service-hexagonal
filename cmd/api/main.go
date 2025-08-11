@@ -1,18 +1,17 @@
-package api
+package main
 
 import (
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 	"log"
 	"user-service-hexagonal/internal/adapters/handlers"
 	"user-service-hexagonal/internal/adapters/repository"
 	"user-service-hexagonal/internal/config"
 	"user-service-hexagonal/internal/core/services"
-	"user-service-hexagonal/pkg/logger"
-
 	"user-service-hexagonal/pkg/auth"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
+	"user-service-hexagonal/pkg/logger"
 )
 
 func main() {
