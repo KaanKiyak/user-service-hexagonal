@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"log"
+	"sync"
 	"user-service-hexagonal/internal/adapters/handlers"
 	"user-service-hexagonal/internal/adapters/repository"
 	"user-service-hexagonal/internal/config"
@@ -14,23 +15,48 @@ import (
 	"user-service-hexagonal/pkg/logger"
 )
 
+var (
+	db   *sql.DB
+	once sync.Once
+)
+
+func GetDBConnection() *sql.DB {
+	once.Do(func() {
+		dsn := "root:12345678@tcp(localhost:3306)/user_db"
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			log.Fatalf("DB bağlantısı açılamadı: %v", err)
+		}
+		defer db.Close()
+
+		if err := db.Ping(); err != nil {
+			log.Fatalf("DB ping başarısız: %v", err)
+		}
+
+	})
+	return db
+}
+
+var (
+	redisClient *redis.Client
+	redisOnce   sync.Once
+)
+
+func GetRedisConnection() *redis.Client {
+	redisOnce.Do(func() {
+		redisClient = redis.NewClient(&redis.Options{
+			Addr: "localhost:6379",
+		})
+	})
+	return redisClient
+}
+
 func main() {
 	// 1. DB bağlantısı
-	dsn := "root:12345678@tcp(localhost:3306)/user_db"
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatalf("DB bağlantısı açılamadı: %v", err)
-	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		log.Fatalf("DB ping başarısız: %v", err)
-	}
-
+	db = GetDBConnection()
 	// 2. Redis Adapter
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-	})
+	redisClient := GetRedisConnection()
+
 	redisAdapter := repository.NewRedisAdapter(redisClient) // ports.RedisPorts implementasyonu
 	redisService := services.NewRedisService(redisAdapter)
 

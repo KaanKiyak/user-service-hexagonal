@@ -1,11 +1,26 @@
 package logger
 
 import (
-	"log"
+	"github.com/sirupsen/logrus"
 	"strings"
+	"sync"
 	"time"
 	"user-service-hexagonal/internal/config"
 )
+
+var (
+	appLogger *logrus.Logger
+	logOnce   sync.Once
+)
+
+func GetLogger() *logrus.Logger {
+	logOnce.Do(func() {
+		appLogger = logrus.New()
+		appLogger.SetFormatter(&logrus.JSONFormatter{})
+		appLogger.SetLevel(logrus.InfoLevel)
+	})
+	return appLogger
+}
 
 // EventLog structu event_logs tablosunu temsil eder
 type EventLog struct {
@@ -27,7 +42,7 @@ func LogEvent(
 	userID *int,
 	email, sessionID, eventType, status, reason, ip, userAgent, requestPath string,
 ) error {
-
+	log := GetLogger()
 	// Formatlama
 	status = strings.ToUpper(strings.TrimSpace(status))
 	eventType = strings.ToUpper(strings.TrimSpace(eventType))
