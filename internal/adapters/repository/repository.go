@@ -66,3 +66,19 @@ func (r *userRepository) DeleteUser(id string) error {
 	_, err := r.db.Exec(query, id)
 	return err
 }
+func (r *userRepository) LoginUser(email string) (*domain.User, error) {
+	user := &domain.User{}
+
+	query := "SELECT id, uuid, email, password FROM users WHERE email = ? LIMIT 1"
+	row := r.db.QueryRow(query, email)
+
+	if err := row.Scan(&user.ID, &user.UUID, &user.Email, &user.Password); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // kullanıcı yok
+		}
+		return nil, err
+	}
+
+	return user, nil
+
+}

@@ -15,26 +15,39 @@ type RedisClient interface {
 	Get(ctx context.Context, key string, dest interface{}) error
 }
 
-// GenerateTokens hem access hem refresh token üretir
-func GenerateTokens(user *domain.User, secretKey string, redis RedisClient) (string, string, error) {
-	// Access token
+// GenerateAccessToken sadece access token üretir
+func GenerateAccessToken(user *domain.User, secretKey string) (string, error) {
 	accessClaims := jwt.MapClaims{
 		"user_id": user.ID,
 		"email":   user.Email,
 		"uuid":    user.UUID,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
 	}
-	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString([]byte(secretKey))
+
+	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).
+		SignedString([]byte(secretKey))
+	if err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
+}
+
+// GenerateTokens hem access hem refresh token üretir (refresh endpoint için)
+func GenerateTokens(user *domain.User, secretKey string, redis RedisClient) (string, string, error) {
+	// Access token üret
+	accessToken, err := GenerateAccessToken(user, secretKey)
 	if err != nil {
 		return "", "", err
 	}
 
-	// Refresh token
+	// Refresh token üret
 	refreshClaims := jwt.MapClaims{
 		"uuid": user.UUID,
 		"exp":  time.Now().Add(7 * 24 * time.Hour).Unix(),
 	}
-	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(secretKey))
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).
+		SignedString([]byte(secretKey))
 	if err != nil {
 		return "", "", err
 	}
