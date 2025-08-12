@@ -1,10 +1,12 @@
 package services
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"user-service-hexagonal/internal/core/domain"
 	"user-service-hexagonal/internal/core/ports"
+	"user-service-hexagonal/pkg/auth"
 )
 
 type userService struct {
@@ -46,4 +48,21 @@ func (u *userService) UpdateUser(id, email, password string) error {
 
 func (u *userService) DeleteUser(id string) error {
 	return u.repo.DeleteUser(id)
+}
+func (u *userService) LoginUser(email, password string) (string, error) {
+	user, err := u.repo.LoginUser(email)
+	if err != nil {
+		return "", err
+	}
+	if user == nil {
+		return "", fmt.Errorf("kullanıcı bulunamadı")
+	}
+
+	// Şifre kontrolü
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "", fmt.Errorf("şifre hatalı")
+	}
+
+	// Sadece access token üret
+	return auth.GenerateAccessToken(user, "SECRET_KEY")
 }

@@ -66,6 +66,7 @@ func main() {
 
 	// 4. Handler
 	registerHandler := handlers.NewRegister(userService)
+	loginHandler := handlers.NewLoginUser(userService)
 	readUserHandler := handlers.NewReadUser(userService)
 	readUsersHandler := handlers.NewReadUsers(userService)
 	updateUserHandler := handlers.NewUpdateUser(userService)
@@ -104,7 +105,7 @@ func main() {
 
 	// Register & Login
 	api.Post("/users", registerHandler.CreateUser)
-	api.Post("/user/login", registerHandler.CreateUser) // login handler yazılmalı
+	api.Post("/user/login", loginHandler.LoginUser) // login handler yazılmalı
 
 	// Protected routes
 	user := api.Use(func(c *fiber.Ctx) error {
