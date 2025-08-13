@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"user-service-hexagonal/internal/core/mapper"
 	"user-service-hexagonal/internal/core/ports"
 )
 
@@ -21,5 +22,5 @@ func (r *ReadUsers) ReadUsers(c *fiber.Ctx) error {
 			"error": "users not found",
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(users)
+	return c.Status(fiber.StatusOK).JSON(mapper.ToUserResponseList(users))
 }

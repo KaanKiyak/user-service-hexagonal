@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"user-service-hexagonal/internal/core/dto"
+	"user-service-hexagonal/internal/core/mapper"
 	"user-service-hexagonal/internal/core/ports"
 )
 
@@ -15,13 +17,8 @@ func NewLoginUser(userService ports.UserService) *LoginUser {
 	}
 }
 
-type loginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 func (l *LoginUser) LoginUser(c *fiber.Ctx) error {
-	var req loginRequest
+	var req dto.LoginRequest
 
 	// 1️ Body parse
 	if err := c.BodyParser(&req); err != nil {
@@ -47,8 +44,6 @@ func (l *LoginUser) LoginUser(c *fiber.Ctx) error {
 	}
 
 	// 4️ Başarılı dönüş
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message":      "Giriş başarılı",
-		"access_token": accessToken,
-	})
+	return c.Status(fiber.StatusOK).JSON(mapper.ToLoginResponse(accessToken))
+
 }

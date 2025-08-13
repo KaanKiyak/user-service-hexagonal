@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"user-service-hexagonal/internal/core/domain"
+	"user-service-hexagonal/internal/core/dto"
+	"user-service-hexagonal/internal/core/mapper"
 	"user-service-hexagonal/internal/core/ports"
 )
 
@@ -16,7 +17,7 @@ func NewRegister(userService ports.UserService) *Register {
 	}
 }
 func (r *Register) CreateUser(c *fiber.Ctx) error {
-	var req domain.User
+	var req dto.CreateUserRequest
 
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -24,19 +25,13 @@ func (r *Register) CreateUser(c *fiber.Ctx) error {
 		})
 	}
 	//buraya validayionslar gelecek
-	createdUser, err := r.userService.CreateUser(&req)
+	userDomain := mapper.ToUserDomain(&req)
+	createdUser, err := r.userService.CreateUser(userDomain)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Kullanıcı oluşturulamadı: " + err.Error(),
 		})
 	}
-
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"user_id": createdUser.ID,
-		"uuid":    createdUser.UUID,
-		"email":   createdUser.Email,
-		"name":    createdUser.Name,
-		"age":     createdUser.Age,
-		"role":    createdUser.Role,
-	})
+	response := mapper.ToUserResponse(createdUser)
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
