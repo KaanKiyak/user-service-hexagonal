@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
-	"user-service-hexagonal/internal/core/domain"
+	"user-service-hexagonal/internal/core/dto"
 	"user-service-hexagonal/internal/core/ports"
 )
 
@@ -23,7 +23,7 @@ func (r *UpdateUser) UpdateUser(c *fiber.Ctx) error {
 			"error": "user id is required",
 		})
 	}
-	var req domain.User
+	var req dto.UpdateUserRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "geçersiz istek",

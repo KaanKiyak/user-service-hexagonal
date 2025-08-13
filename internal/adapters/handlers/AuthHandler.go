@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"user-service-hexagonal/internal/core/dto"
+	"user-service-hexagonal/internal/core/mapper"
 	"user-service-hexagonal/internal/core/ports"
 )
 
@@ -17,11 +19,8 @@ func NewAuthHandler(authService ports.AuthService) *AuthHandler {
 
 // RefreshToken handler'ı: client'tan refresh token alır, yeni access ve refresh token üretir.
 func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
-	type RefreshRequest struct {
-		RefreshToken string `json:"refresh_token"`
-	}
+	var req dto.RefreshTokenRequest
 
-	req := new(RefreshRequest)
 	if err := c.BodyParser(req); err != nil || req.RefreshToken == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Geçersiz istek veya refresh token eksik",
@@ -35,8 +34,7 @@ func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"access_token":  newAccessToken,
-		"refresh_token": newRefreshToken,
-	})
+	return c.Status(fiber.StatusOK).JSON(
+		mapper.ToRefreshTokenResponse(newAccessToken, newRefreshToken),
+	)
 }

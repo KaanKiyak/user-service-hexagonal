@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"user-service-hexagonal/internal/core/mapper"
 	"user-service-hexagonal/internal/core/ports"
 )
 
@@ -28,5 +29,5 @@ func (r *DeleteUser) DeleteUser(c *fiber.Ctx) error {
 		})
 
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{})
+	return c.Status(fiber.StatusOK).JSON(mapper.ToDeleteUserResponse())
 }
