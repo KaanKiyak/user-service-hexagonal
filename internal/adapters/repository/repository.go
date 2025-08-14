@@ -15,7 +15,7 @@ func NewUserRepository(db *sql.DB) ports.UserRepository {
 }
 
 func (r *userRepository) CreateUser(user *domain.User) (*domain.User, error) {
-	query := `INSERT INTO users (uuid, name, email, age, password, role_id) VALUES (?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO users (uuid, name, email, age, password, role) VALUES (?, ?, ?, ?, ?, ?)`
 	_, err := r.db.Exec(query, user.UUID, user.Name, user.Email, user.Age, user.Password, user.Role)
 	if err != nil {
 		return nil, err
