@@ -7,6 +7,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"log"
 	"sync"
+	"time"
 	"user-service-hexagonal/internal/adapters/handlers"
 	"user-service-hexagonal/internal/adapters/repository"
 	"user-service-hexagonal/internal/config"
@@ -22,17 +23,16 @@ var (
 
 func GetDBConnection() *sql.DB {
 	once.Do(func() {
-		dsn := "root:12345678@tcp(localhost:3306)/user_db"
-		db, err := sql.Open("mysql", dsn)
+		dsn := "root:12345678@tcp(127.0.0.1:3306)/user_db"
+		var err error
+		db, err = sql.Open("mysql", dsn) // global db'yi kullan
 		if err != nil {
 			log.Fatalf("DB bağlantısı açılamadı: %v", err)
 		}
-		defer db.Close()
 
 		if err := db.Ping(); err != nil {
 			log.Fatalf("DB ping başarısız: %v", err)
 		}
-
 	})
 	return db
 }
@@ -73,39 +73,43 @@ func main() {
 	deleteUserHandler := handlers.NewDeleteUser(userService)
 
 	// 5. Fiber app başlat
+	eventLogger := logger.New(db) // DB’yi logger’a ENJEKTE ET
+
 	app := fiber.New()
 
-	// 6. Middleware - Logger
-	app.Use(func(c *fiber.Ctx) error {
-		var userID *int = nil
+	// Middleware - Logger
+	logMiddleware := func(c *fiber.Ctx) error {
+		userID := 0 // login olmadıysa 0
 		email := ""
+		sessionID := c.Get("X-Session-ID")
+		userAgent := string(c.Request().Header.UserAgent())
+		path := c.Path()
+		reason := ""
 
-		err := logger.LogEvent(
+		if err := eventLogger.LogEvent(
 			userID,
 			email,
-			c.Get("X-Session-ID"),
+			sessionID,
 			"PROFILE_REQUEST",
-			"SUCCESS",
-			"",
 			c.IP(),
-			string(c.Request().Header.UserAgent()),
-			c.Path(),
-		)
-
-		if err != nil {
-			// Hata durumunda yapılacaklar
+			userAgent,
+			"SUCCESS",
+			reason,
+			path,
+			time.Now(),
+		); err != nil {
 			log.Printf("Logger middleware error: %v", err)
 		}
 
 		return c.Next()
-	})
+	}
 
 	// 7. Routes
 	api := app.Group("/api")
 
 	// Register & Login
 	api.Post("/users", registerHandler.CreateUser)
-	api.Post("/user/login", loginHandler.LoginUser) // login handler yazılmalı
+	api.Post("/user/login", logMiddleware, loginHandler.LoginUser) // login handler yazılmalı
 
 	// Protected routes
 	user := api.Use(func(c *fiber.Ctx) error {
@@ -126,10 +130,10 @@ func main() {
 		return c.Next()
 	})
 
-	user.Get("/users/:id", readUserHandler.ReadUser)
-	user.Get("/users", readUsersHandler.ReadUsers)
-	user.Put("/users/:id", updateUserHandler.UpdateUser)
-	user.Delete("/users/:id", deleteUserHandler.DeleteUser)
+	user.Get("/users/:id", logMiddleware, readUserHandler.ReadUser)
+	user.Get("/users", logMiddleware, readUsersHandler.ReadUsers)
+	user.Put("/users/:id", logMiddleware, updateUserHandler.UpdateUser)
+	user.Delete("/users/:id", logMiddleware, deleteUserHandler.DeleteUser)
 
 	// Refresh token
 	api.Get("/refresh-token", func(c *fiber.Ctx) error {
