@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	"user-service-hexagonal/internal/config"
 
 	"github.com/golang-jwt/jwt/v5"
 	"user-service-hexagonal/internal/core/domain"
@@ -21,11 +22,11 @@ func GenerateAccessToken(user *domain.User, secretKey string) (string, error) {
 		"user_id": user.ID,
 		"email":   user.Email,
 		"uuid":    user.UUID,
-		"exp":     time.Now().Add(15 * time.Minute).Unix(),
+		"exp":     time.Now().Add(999 * 15 * time.Minute).Unix(),
 	}
 
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).
-		SignedString([]byte(secretKey))
+		SignedString([]byte(config.JWTSecret))
 	if err != nil {
 		return "", err
 	}

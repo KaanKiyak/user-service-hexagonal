@@ -41,10 +41,10 @@ func (r *UpdateUser) UpdateUser(c *fiber.Ctx) error {
 		}
 		err = r.userService.UpdateUser(id, req.Email, req.Password)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "kullanıcı güncellenemdi" + err.Error()})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "kullanıcı güncellenemedi" + err.Error()})
 		}
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"massege": "kullanıcı başarıyla gğncellenemedi",
+		"massege": "kullanıcı başarıyla gğncellendi",
 	})
 }
