@@ -33,7 +33,7 @@ func (u *userService) CreateUser(user *domain.User) (*domain.User, error) {
 	// Repo'dan kullanıcı oluşturmayı çağır
 	return u.repo.CreateUser(user)
 }
-func (u *userService) ReadUser(id string) (*domain.User, error) {
+func (u *userService) ReadUser(id int) (*domain.User, error) {
 	return u.repo.ReadUser(id)
 }
 

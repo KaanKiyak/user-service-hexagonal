@@ -23,8 +23,8 @@ func (r *userRepository) CreateUser(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
-func (r *userRepository) ReadUser(id string) (*domain.User, error) {
-	query := `SELECT id, uuid, name, email, age, password, role_id FROM users WHERE id = ?`
+func (r *userRepository) ReadUser(id int) (*domain.User, error) {
+	query := `SELECT id, uuid, name, email, age, password, role FROM users WHERE id = ?`
 	row := r.db.QueryRow(query, id)
 
 	user := &domain.User{}
@@ -36,7 +36,7 @@ func (r *userRepository) ReadUser(id string) (*domain.User, error) {
 }
 
 func (r *userRepository) ReadUsers() ([]*domain.User, error) {
-	query := `SELECT id, uuid, name, email, age, password, role_id FROM users`
+	query := `SELECT id, uuid, name, email, age, password, role FROM users`
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err

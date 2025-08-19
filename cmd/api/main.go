@@ -119,14 +119,17 @@ func main() {
 				"error": "token yok",
 			})
 		}
-
-		valid, err := auth.ValidateToken(token)
-		if err != nil || !valid {
+		if len(token) > 7 && token[:7] == "Bearer " {
+			token = token[7:]
+		}
+		claims, err := auth.ValidateToken(token)
+		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "geçersiz token",
+				"error":  "geçersiz token",
+				"detail": err.Error(),
 			})
 		}
-
+		c.Locals("userID", claims.UserID)
 		return c.Next()
 	})
 

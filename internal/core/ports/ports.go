@@ -12,7 +12,7 @@ type AuthService interface {
 
 type UserService interface {
 	CreateUser(user *domain.User) (*domain.User, error)
-	ReadUser(id string) (*domain.User, error)
+	ReadUser(id int) (*domain.User, error)
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
 	DeleteUser(id string) error
@@ -20,7 +20,7 @@ type UserService interface {
 }
 type UserRepository interface {
 	CreateUser(user *domain.User) (*domain.User, error)
-	ReadUser(id string) (*domain.User, error)
+	ReadUser(id int) (*domain.User, error)
 	ReadUsers() ([]*domain.User, error)
 	UpdateUser(id, email, password string) error
 	DeleteUser(id string) error
