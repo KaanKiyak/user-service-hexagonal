@@ -19,9 +19,17 @@ func NewUserService(repo ports.UserRepository) ports.UserService {
 	}
 }
 
+// dto struct (crate user) -> doğrulama fonksiyonları
+// dto struct (create user) -> apapter
+// dto struct (user login response) -> handler
+
 func (u *userService) CreateUser(user *domain.User) (*domain.User, error) {
 	// UUID oluştur
 	user.UUID = uuid.New().String()
+
+	if err := user.ValidateBusinessRules(); err != nil {
+		return nil, err
+	}
 
 	// Password hashle
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
