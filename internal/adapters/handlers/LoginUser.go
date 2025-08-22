@@ -27,13 +27,6 @@ func (l *LoginUser) LoginUser(c *fiber.Ctx) error {
 		})
 	}
 
-	// 2️ Basit validation
-	if req.Email == "" || req.Password == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Email ve şifre zorunludur",
-		})
-	}
-
 	// 3️ Service katmanına login isteği
 	accessToken, err := l.userService.LoginUser(req.Email, req.Password)
 	if err != nil {
