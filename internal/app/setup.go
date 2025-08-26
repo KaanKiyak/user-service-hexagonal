@@ -43,11 +43,11 @@ func NewApp(db *sql.DB, redisClient *redis.Client) *fiber.App {
 	api.Post("/user/login", logMiddleware, loginHandler.LoginUser)
 
 	// Protected routes
-	user := api.Use(authMiddleware)
-	user.Get("/users/:id", logMiddleware, readUserHandler.ReadUser)
-	user.Get("/users", logMiddleware, readUsersHandler.ReadUsers)
-	user.Put("/users/:id", logMiddleware, updateUserHandler.UpdateUser)
-	user.Delete("/users/:id", logMiddleware, deleteUserHandler.DeleteUser)
+	api.Use(authMiddleware)
+	api.Get("/users/:id", logMiddleware, readUserHandler.ReadUser)
+	api.Get("/users", logMiddleware, readUsersHandler.ReadUsers)
+	api.Put("/users/:id", logMiddleware, updateUserHandler.UpdateUser)
+	api.Delete("/users/:id", logMiddleware, deleteUserHandler.DeleteUser)
 
 	// Refresh token route
 	api.Get("/refresh-token", func(c *fiber.Ctx) error {
