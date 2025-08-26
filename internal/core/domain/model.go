@@ -17,7 +17,7 @@ func (u *User) ValidateBusinessRules() error {
 	// Name sadece harf ve boşluk içerebilir
 	for _, c := range u.Name {
 		if (c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != ' ' {
-			return fmt.Errorf("isim sadece harf ve boşluk içerebilir")
+			return fmt.Errorf("isim sadece harf içerebilir boşluk olamaz")
 		}
 	}
 
