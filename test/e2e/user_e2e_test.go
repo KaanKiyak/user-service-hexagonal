@@ -42,10 +42,15 @@ func TestUserE2E(t *testing.T) {
 	redisClient := getMockRedis()
 	defer redisClient.Close()
 
+<<<<<<< Updated upstream
 	app := intapp.NewApp(db, redisClient)
 
 	// create
 	body := `{"name":"selo","email":"selo@gmail.com","age":99,"password":"1234","role":"user"}`
+=======
+	app := app.NewApp(db, redisClient)
+	body := `{"name":"neco","email":"neco@gmail.com","age":99,"password":"1234","role":"user"}`
+>>>>>>> Stashed changes
 	req := httptest.NewRequest("POST", "/api/users", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
